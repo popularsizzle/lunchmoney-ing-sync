@@ -1,0 +1,29 @@
+service: lunchmoney-ing-sync
+
+provider:
+  name: aws
+  region: ap-southeast-2
+  stage: prod
+  versionFunctions: false
+
+  layers:
+    - arn:aws:lambda:ap-southeast-2:764866452798:layer:chrome-aws-lambda:24
+
+  runtime: nodejs14.x
+  memorySize: 1024
+  timeout: 30
+
+functions:
+  sync:
+    handler: handler.sync
+    events:
+      - schedule:
+          name: ${self:service}
+          rate: rate(1 hour)
+    environment:
+      CLIENT_NUMBER: 00000000
+      ACCESS_CODE: 0000
+      SEARCH_DAYS: 10
+      ACCOUNT_000000000: 00000
+      ACCOUNT_000000000: 00000
+      API_KEY: 00000000000000000000000000000000000000000000000000

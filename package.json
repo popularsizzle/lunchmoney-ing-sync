@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "devDependencies": {
+    "chrome-aws-lambda": "^10.1.0",
+    "puppeteer": "^10.1.0",
+    "serverless": "^2.52.1"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "csv-parse": "^4.16.0",
+    "ing-au-login": "^2.0.5",
+    "moment": "^2.29.1"
+  }
+}
