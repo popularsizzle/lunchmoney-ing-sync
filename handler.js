@@ -45,23 +45,14 @@ exports.sync = async event => {
     }
 
     for await (const transaction of parser) {
-      let [date, account, payee, credit, amount] = transaction;
-
-      // exclude transfers between our own accounts
-      if (payee.includes('Internal Transfer')) {
-        continue;
-      }
-
-      // we're only interested in money being spent, so exclude any deposits
-      if (!/^[-0-9.]+$/.test(amount)) {
-        continue;
-      }
+      let [date, account, payee, credit, debit] = transaction;
+      let amount = credit || debit;
 
       // change date into international format
       date = date.split('/').reverse().join('-');
 
-      // start from 2022 financial year
-      if (moment(date).isBefore('2021-07-01')) {
+      // start from 2023 financial year
+      if (moment(date).isBefore('2022-07-01')) {
           continue;
       }
 
@@ -102,6 +93,7 @@ exports.sync = async event => {
 
       // remove unnecessary strings
       [
+        'Internal Transfer',
         'Visa Purchase',
         'EFTPOS Purchase',
         'Direct Debit',
@@ -125,8 +117,7 @@ exports.sync = async event => {
         'https://dev.lunchmoney.app/v1/transactions',
         {
           transactions,
-          debit_as_negative: true,
-          skip_balance_update: true
+          debit_as_negative: true
         },
         {
           headers: {
@@ -146,5 +137,5 @@ exports.sync = async event => {
     response.error = e.message;
   }
 
-  return response;
+  console.log(response);
 }
