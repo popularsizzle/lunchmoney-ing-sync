@@ -115,6 +115,8 @@ exports.sync = async event => {
       });
     }
 
+    transactions.reverse();
+
     const insert = await axios.post(
         'https://dev.lunchmoney.app/v1/transactions',
         {
