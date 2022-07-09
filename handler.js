@@ -3,6 +3,7 @@ const { login } = require('ing-au-login');
 const axios = require('axios');
 const moment = require('moment');
 const parse = require('csv-parse');
+const crypto = require('crypto');
 
 exports.sync = async event => {
   const response = { success: null, inserts: null, error: null };
@@ -46,6 +47,7 @@ exports.sync = async event => {
 
     for await (const transaction of parser) {
       let [date, account, payee, credit, debit] = transaction;
+      let hash = crypto.createHash('md5').update(payee).digest('hex');
       let amount = credit || debit;
 
       // change date into international format
@@ -73,7 +75,7 @@ exports.sync = async event => {
       }
 
       // use receipt number for external id de-duping
-      let external_id = receipt[1];
+      let external_id = receipt[1] + '_' + hash;
 
       let tags = [];
 
