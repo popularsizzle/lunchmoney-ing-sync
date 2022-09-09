@@ -33,6 +33,7 @@ exports.sync = async event => {
     const parser = parse(csv, { from_line: 2 });
 
     const transactions = [];
+    const cashbacks = [];
 
     // 'account': 'asset_id'
     const accounts = {};
@@ -69,13 +70,15 @@ exports.sync = async event => {
       // split out receipt number
       let receipt = payee.match(/Receipt ([0-9]+)/);
 
-      // exclude transactions that don't have a receipt number
-      if (!receipt) {
-        continue;
-      }
-
       // use receipt number for external id de-duping
-      let external_id = receipt[1] + '_' + hash;
+      let external_id = (receipt ? receipt[1] : '000000') + '_' + hash;
+
+      // special logic for cashbacks as they don't have receipt numbers, and there can be multiple
+      // identical transactions on the same day
+      if (payee == 'Utility Bill Cashback') {
+          cashbacks[date] = ++cashbacks[date] || 1;
+          external_id += '_' + date.replace(/-/g, '') + '_' + cashbacks[date];
+      }
 
       let tags = [];
 
@@ -89,7 +92,7 @@ exports.sync = async event => {
 
       // strip everything after the receipt number,
       // except for direct debits, as they have a description after the receipt number
-      if (!payee.includes('Direct Debit')) {
+      if (receipt && !payee.includes('Direct Debit')) {
         payee = payee.slice(0, payee.indexOf(receipt[0]));
       }
 
@@ -99,8 +102,8 @@ exports.sync = async event => {
         'Visa Purchase',
         'EFTPOS Purchase',
         'Direct Debit',
-        receipt[0]
-      ].forEach(s => payee = payee.replace(s, ''));
+        receipt ? receipt[0] : null
+      ].forEach(s => payee = s ? payee.replace(s, '') : payee);
 
       // remove unnecessary whitespace and dashes
       payee = payee.replace(/[- ]+/g, ' ').trim();
