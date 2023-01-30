@@ -2,7 +2,7 @@ const chrome = require('chrome-aws-lambda');
 const { login } = require('ing-au-login');
 const axios = require('axios');
 const moment = require('moment');
-const parse = require('csv-parse');
+const { parse } = require('csv-parse');
 const crypto = require('crypto');
 
 exports.sync = async event => {
